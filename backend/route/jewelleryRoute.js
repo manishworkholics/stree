@@ -1,13 +1,14 @@
 const express = require('express')
-const { addjewellery, getjewellery } = require('../controller/jewelleryController')
+const { addJewellery, getJewellery } = require('../controller/jewelleryController')
+const upload = require("../middleware/upload");
 const jewelleries = express.Router()
 
 
 
 
 
-jewelleries.post('/add-jewellery', addjewellery)
-jewelleries.get('/get-jewellery', getjewellery)
+jewelleries.post('/add-jewellery', upload.single("photo"), addJewellery)
+jewelleries.get('/get-jewellery', getJewellery)
 
 
 
