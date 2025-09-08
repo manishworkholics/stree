@@ -2,27 +2,63 @@ const Booking = require("../models/BookingModel");
 
 
 // Create booking
+// exports.createBooking = async (req, res) => {
+//     try {
+//         const bookingData = req.body;
+
+//         // auto calculate due
+//         bookingData.due = (bookingData.totalAmount || 0) - (bookingData.advance || 0);
+
+//         const booking = new Booking(bookingData);
+//         await booking.save();
+
+//         res.status(201).json({
+//             success: true,
+//             message: "Booking created successfully",
+//             data: booking,
+//         });
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: error.message });
+//     }
+// };
+
+
 exports.createBooking = async (req, res) => {
     try {
-        const bookingData = req.body;
+        const {
+            customerName,
+            mobileNumber,
+            customerAddress,
+            items,
+            totalAmount,
+            advance,
+            remark
+        } = req.body;
 
-        // auto calculate due
-        bookingData.due = (bookingData.totalAmount || 0) - (bookingData.advance || 0);
+        // Auto-calc due
+        const due = totalAmount - advance;
 
-        const booking = new Booking(bookingData);
-        await booking.save();
-
-        res.status(201).json({
-            success: true,
-            message: "Booking created successfully",
-            data: booking,
+        const booking = new Booking({
+            customerName,
+            mobileNumber,
+            customerAddress,
+            items,
+            totalAmount,
+            advance,
+            due,
+            remark
         });
+
+        await booking.save();
+        res.status(201).json({ success: true, data: booking });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
-// Get all bookings
+
+
+
 exports.getAllBookings = async (req, res) => {
     try {
         const bookings = await Booking.find().sort({ createdAt: -1 });
