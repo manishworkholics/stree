@@ -11,7 +11,7 @@ const Header = () => {
                         <span className="d-block d-lg-none">
                             <Link to="/dashboard">
                                 <img
-                                    className="log__smnall py-2 object-fit-contain"
+                                    className="log__smnall py-0 object-fit-contain"
                                     src="assets/img/logo/logo.png"
                                     alt="logo not found"
                                     style={{ width: '70px' }}
@@ -54,7 +54,7 @@ const Header = () => {
                                                     className="log__smnall py-2 object-fit-contain"
                                                     src="assets/img/logo/logo.png"
                                                     alt="logo not found"
-                                                    style={{ width: '70px' }}
+                                                    style={{ width: '100px' }}
                                                 />
                                             </Link>
                                         </span>

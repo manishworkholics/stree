@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const Billing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [billData, setBillData] = useState(null);
+  // const [billData, setBillData] = useState(null);
 
   // 🔹 Dummy static booking data
   const bookingList = [

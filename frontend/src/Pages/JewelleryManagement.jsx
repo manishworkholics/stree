@@ -1,42 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Sidebar";
 import Header from "../Components/Header";
 import { Link } from "react-router-dom";
 import JewelleryForm from "./JewelleryForm";
+import { callApi } from "../utils/api";
+import { toast } from "react-toastify";
+import EditJewelleryForm from "./EditJewelleryForm";
 
 const JewelleryManagement = () => {
-  const [jewelleryList, setJewelleryList] = useState([
-    {
-      id: 1,
-      name: "Gold Necklace",
-      price: 5000,
-      availability: "Available",
-      photo: "https://via.placeholder.com/80"
-    },
-    {
-      id: 2,
-      name: "Diamond Ring",
-      price: 15000,
-      availability: "Not Available",
-      photo: "https://via.placeholder.com/80"
-    }
-  ]);
+  const [jewelleryList, setJewelleryList] = useState([]);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // 🔹 Get jewellery list on mount
+  useEffect(() => {
+    fetchJewelleries();
+  }, []);
+
+  const fetchJewelleries = async () => {
+    try {
+      const data = await callApi("/get-jewellery", "GET");
+      setJewelleryList(data);
+    } catch (err) {
+      toast.error(err.message || "Failed to fetch jewelleries");
+    }
+  };
 
   const handleDelete = (id) => {
     setDeleteId(id);
     setIsDeleteModalOpen(true);
   };
 
-  const deleteItem = (id) => {
-    setJewelleryList(jewelleryList.filter((item) => item.id !== id));
+  // 🔹 Confirm delete
+  const deleteItem = async (id) => {
+    try {
+      await callApi(`/delete-jewellery/${id}`, "DELETE");
+      setJewelleryList(jewelleryList.filter((item) => item._id !== id));
+      toast.success("Jewellery deleted!");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete");
+    }
     setIsDeleteModalOpen(false);
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const handleEditClick = (item) => {
+    setEditData(item);       // selected jewellery
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -89,7 +105,7 @@ const JewelleryManagement = () => {
 
                 <div className="pb-20">
                   <div className="tab-content" id="myTabContent">
-                    
+
                     {/* 🔹 Add Jewellery Tab */}
                     <div className="tab-pane fade show active" id="tab-1-pane" role="tabpanel">
                       <div className="body__card-wrapper">
@@ -119,6 +135,7 @@ const JewelleryManagement = () => {
                               <tr>
                                 <th>S.No</th>
                                 <th>Name</th>
+                                <th>Jewellery Code</th>
                                 <th>Photo</th>
                                 <th>Price</th>
                                 <th>Availability</th>
@@ -127,17 +144,21 @@ const JewelleryManagement = () => {
                             </thead>
                             <tbody>
                               {jewelleryList.map((val, index) => (
-                                <tr key={val.id}>
-                                  <td><span>{index + 1}</span></td>
-                                  <td><span>{val.name}</span></td>
+                                <tr key={val._id}>
+                                  <td>{index + 1}</td>
+                                  <td>{val.name}</td>
+                                  <td>{val.code}</td>
                                   <td><img src={val.photo} alt={val.name} width="50" /></td>
-                                  <td><span><i className="fa-solid fa-indian-rupee-sign me-2"></i>{val.price}</span></td>
-                                  <td><span>{val.availability}</span></td>
+                                  <td>{val.pricePerDay}</td>
+                                  <td>{val.isAvailable ? "Available" : "Not Available"}</td>
                                   <td>
-                                    <button type="button" className="btn border-0">
+                                    <button
+                                      className="btn border-0"
+                                      onClick={() => handleEditClick(val)}
+                                    >
                                       <i className="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <button onClick={() => handleDelete(val.id)} type="button" className="btn border-0">
+                                    <button onClick={() => handleDelete(val._id)} className="btn border-0">
                                       <i className="fa-solid fa-trash-can text-danger"></i>
                                     </button>
                                   </td>
@@ -159,15 +180,37 @@ const JewelleryManagement = () => {
         </div>
       </div>
 
+      {isEditModalOpen && (
+        <div className="modal show" style={{ display: "block", background: "#0000008e" }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header bg-primary py-3">
+                <h4 className="modal-title text-white">Edit Jewellery</h4>
+                <button type="button" className="close" onClick={() => setIsEditModalOpen(false)}>
+                  <i className="fa-solid fa-xmark fs-3 text-white"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <EditJewelleryForm
+                  editData={editData}
+                  setJewelleryList={setJewelleryList}
+                  onClose={() => setIsEditModalOpen(false)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Modal */}
       {isDeleteModalOpen && (
         <div className="modal show" style={{ display: "block", background: "#0000008e" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header bg-ffe2e5 py-3">
-                <h4 className="modal-title text-danger">Warning!</h4>
+                <h4 className="modal-title text-white">Warning!</h4>
                 <button type="button" className="close" onClick={closeDeleteModal}>
-                  <i className="fa-solid fa-xmark fs-3 text-danger"></i>
+                  <i className="fa-solid fa-xmark fs-3 text-white"></i>
                 </button>
               </div>
               <div className="modal-body text-center">
