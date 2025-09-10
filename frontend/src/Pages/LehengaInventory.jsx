@@ -64,7 +64,7 @@ const LehengaInventory = ({ sizeList }) => {
     const handleAddLehenga = async (e) => {
         e.preventDefault();
         if (!newLehenga.name || !newLehenga.size || !newLehenga.rentPrice || !newLehenga.code) {
-            alert("Please fill all required fields!");
+            toast.error("Please fill all required fields!");
             return;
         }
 
@@ -250,7 +250,8 @@ const LehengaInventory = ({ sizeList }) => {
 
                                                         <div className="col-12 col-lg-2 d-flex align-items-end mb-15">
                                                             <button type="submit" className="btn btn-success w-100" disabled={loading}>
-                                                                {loading ? "Saving..." : "Add Lehenga"}
+                                                                {/* {loading ? "Saving..." : "Add Lehenga"} */}
+                                                                Add Lehenga
                                                             </button>
                                                         </div>
                                                     </div>

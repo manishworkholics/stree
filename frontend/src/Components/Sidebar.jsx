@@ -50,6 +50,12 @@ const Sidebar = () => {
                                     <span className="nav-text">Jewellery Management</span>
                                 </Link>
                             </li>
+                              <li>
+                                <Link to="/lehenga-inventory" aria-expanded="false">
+                                    <i className="fa-solid fa-tshirt"></i>
+                                    <span className="nav-text">Lehenga Inventory</span>
+                                </Link>
+                            </li>
                             <li>
                                 <Link to="/monthly-report" aria-expanded="false">
                                     <i className="fa-solid fa-calendar-alt"></i>
@@ -62,12 +68,7 @@ const Sidebar = () => {
                                     <span className="nav-text">Billing</span>
                                 </Link>
                             </li>
-                            <li>
-                                <Link to="/lehenga-inventory" aria-expanded="false">
-                                    <i className="fa-solid fa-tshirt"></i>
-                                    <span className="nav-text">Lehenga Inventory</span>
-                                </Link>
-                            </li>
+                          
                             <li>
                                 <Link to="/master" aria-expanded="false">
                                     <i className="fa-solid fa-cogs"></i>
