@@ -24,6 +24,39 @@
 
 /* -----Universal CSS----- */
 
+.singel__input-field select {
+    display: flex;
+    height: 40px;
+    width: 100%;
+    border: 1px solid var(--clr-border-4);
+    padding: 0 15px;
+    border-radius: 4px;
+    background: var(--clr-bg-11);
+    color: var(--clr-text-secondary);
+}
+
+.singel__input-field select:focus {
+    border-color: var(--clr-theme-1);
+    box-shadow: none;
+    outline: none;
+}
+
+.modal-header {
+    background: var(--clr-gradient-4);
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: none !important;
+    border-color: var(--clr-theme-1);
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .offcanvas.w-md-50 {
+        width: 50% !important;
+    }
+}
+
 /* -----Master Page CSS----- */
 .master-page {
     .Expovent__count-item {

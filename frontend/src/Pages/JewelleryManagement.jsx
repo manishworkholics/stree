@@ -12,6 +12,22 @@ const JewelleryManagement = () => {
   const [jewelleryList, setJewelleryList] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // 🔹 Get jewellery list on mount
+  useEffect(() => {
+    fetchJewelleries();
+  }, []);
+
+  const fetchJewelleries = async () => {
+    try {
+      const data = await callApi("/get-jewellery", "GET");
+      setJewelleryList(data);
+    } catch (err) {
+      toast.error(err.message || "Failed to fetch jewelleries");
+    }
+  };
 
   // 🔹 Fetch all jewellery from API
   const fetchJewelleryList = async () => {
@@ -57,6 +73,11 @@ const JewelleryManagement = () => {
 
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const handleEditClick = (item) => {
+    setEditData(item);       // selected jewellery
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -164,6 +185,7 @@ const JewelleryManagement = () => {
                               <tr>
                                 <th>S.No</th>
                                 <th>Name</th>
+                                <th>Jewellery Code</th>
                                 <th>Photo</th>
                                 <th>Price</th>
                                 <th>Availability</th>
@@ -238,6 +260,28 @@ const JewelleryManagement = () => {
           </div>
         </div>
       </div>
+
+      {isEditModalOpen && (
+        <div className="modal show" style={{ display: "block", background: "#0000008e" }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header bg-primary py-3">
+                <h4 className="modal-title text-white">Edit Jewellery</h4>
+                <button type="button" className="close" onClick={() => setIsEditModalOpen(false)}>
+                  <i className="fa-solid fa-xmark fs-3 text-white"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <EditJewelleryForm
+                  editData={editData}
+                  setJewelleryList={setJewelleryList}
+                  onClose={() => setIsEditModalOpen(false)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Modal */}
       {isDeleteModalOpen && (
