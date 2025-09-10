@@ -8,6 +8,8 @@ const lehengaSchema = new mongoose.Schema({
   rentPrice: { type: Number, required: true },
   totalRented: { type: Number, default: 0 },
   totalReturned: { type: Number, default: 0 },
+  isAvailable: { type: Boolean, default: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
   createdAt: { type: Date, default: Date.now }
 });
 

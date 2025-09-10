@@ -31,7 +31,8 @@ const JewelleryForm = ({ fetchJewelleryList }) => {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("code", jewelleryCode);
-    formData.append("price", price);
+    formData.append("rentPrice", price);
+    formData.append("category", "68c13ec4bb96998e91450cca");
     formData.append("isAvailable", availability); // "true" or "false"
     if (photo) {
       formData.append("photo", photo);

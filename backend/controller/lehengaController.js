@@ -3,10 +3,10 @@ const asyncHandler = require("express-async-handler");
 
 // Add New Lehenga
 exports.addLehenga = asyncHandler(async (req, res) => {
-  const { name, code, size, rentPrice } = req.body;
+  const { name, code, size, rentPrice, category, isAvailable, } = req.body;
   const photo = req.file ? `uploads/jewellery/${req.file.filename}` : null;
 
-  const lehenga = new Lehenga({ name, code, size, rentPrice, photo });
+  const lehenga = new Lehenga({ name, code, size, rentPrice, photo, category, isAvailable, });
   await lehenga.save();
   res.status(201).json({ message: "Lehenga added successfully", lehenga });
 });

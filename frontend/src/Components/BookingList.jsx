@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const API_BASE = "http://206.189.130.102:4545/api";
 
 const BookingList = ({ bookingList, setBookingList, handlePageChange, currentPage, totalPages }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -15,20 +18,34 @@ const BookingList = ({ bookingList, setBookingList, handlePageChange, currentPag
         setDeleteId(null);
     };
 
-    const deleteItem = () => {
-        setBookingList(bookingList.filter((item) => item.id !== deleteId));
-        closeDeleteModal();
+    const deleteBooking = async () => {
+        try {
+            await axios.delete(`${API_BASE}/bookings/${deleteId}`);
+            setBookingList(bookingList.filter((item) => item._id !== deleteId));
+            toast.success("Booking deleted successfully!");
+            closeDeleteModal();
+        } catch (error) {
+            console.error("Error deleting booking:", error);
+            toast.error("Failed to delete booking");
+        }
+    };
+
+    const formatDate = (isoDate) => {
+        const d = new Date(isoDate);
+        return `${d.getDate().toString().padStart(2, "0")}-${(d.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}-${d.getFullYear()}`;
     };
 
     return (
         <div className="body__card-wrapper">
             <div className="attendant__wrapper mb-35">
-                <table>
+                <table className="table table-bordered">
                     <thead>
                         <tr>
                             <th>S.No</th>
                             <th>Customer</th>
-                            <th>Dress</th>
+                            <th>Items</th>
                             <th>From Date</th>
                             <th>To Date</th>
                             <th>Size</th>
@@ -38,44 +55,35 @@ const BookingList = ({ bookingList, setBookingList, handlePageChange, currentPag
                         </tr>
                     </thead>
                     <tbody>
-                        {bookingList.map((val, index) => (
-                            <tr key={val.id}>
-                                <td><span>{index + 1}</span></td>
-                                <td>
-                                    <span>
-                                        <Link to="/customer-details">{val.customer.name}</Link>
-                                    </span>
-                                </td>
-                                <td><span>{val.dress.name}</span></td>
-                                <td><span>{val.booking_date_from}</span></td>
-                                <td><span>{val.booking_date_to}</span></td>
-                                <td><span>{val.size.name}</span></td>
-                                <td>
-                                    <span>
-                                        <i className="fa-solid fa-indian-rupee-sign me-2"></i>
-                                        {val.advance}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span>
-                                        <i className="fa-solid fa-indian-rupee-sign me-2"></i>
-                                        {val.due}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button type="button" className="btn border-0">
-                                        <i className="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                    <button
-                                        onClick={() => openDeleteModal(val.id)}
-                                        type="button"
-                                        className="btn border-0"
-                                    >
-                                        <i className="fa-solid fa-trash-can text-danger"></i>
-                                    </button>
-                                </td>
+                        {bookingList.length === 0 ? (
+                            <tr>
+                                <td colSpan="9" className="text-center">No bookings found</td>
                             </tr>
-                        ))}
+                        ) : (
+                            bookingList.map((booking, index) => {
+                                const itemNames = booking.items.map((i) => i.name).join(", ");
+                                const fromDate = booking.items.length > 0 ? formatDate(booking.items[0].bookingDate) : "-";
+                                const toDate = booking.items.length > 0 ? formatDate(booking.items[0].returnDate) : "-";
+                                const size = booking.items.length > 0 ? booking.items[0].size || "-" : "-";
+                                return (
+                                    <tr key={booking._id}>
+                                        <td>{index + 1}</td>
+                                        <td>{booking.customerName}</td>
+                                        <td>{itemNames}</td>
+                                        <td>{fromDate}</td>
+                                        <td>{toDate}</td>
+                                        <td>{size}</td>
+                                        <td>{booking.advance}</td>
+                                        <td>{booking.due}</td>
+                                        <td>
+                                            <button className="btn btn-danger btn-sm" onClick={() => openDeleteModal(booking._id)}>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -84,10 +92,7 @@ const BookingList = ({ bookingList, setBookingList, handlePageChange, currentPag
             <div className="basic__pagination d-flex align-items-center justify-content-end">
                 <ul>
                     <li>
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                        >
+                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                             <i className="fa-solid fa-arrow-left"></i>
                         </button>
                     </li>
@@ -103,10 +108,7 @@ const BookingList = ({ bookingList, setBookingList, handlePageChange, currentPag
                         ))}
                     </li>
                     <li>
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                        >
+                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
                             <i className="fa-solid fa-arrow-right"></i>
                         </button>
                     </li>
@@ -128,18 +130,10 @@ const BookingList = ({ bookingList, setBookingList, handlePageChange, currentPag
                                 <h5 className="text-danger">Do you want to permanently delete?</h5>
                                 <img src="images/deleteWarning.png" alt="" className="w-100 m-auto" />
                                 <div className="d-flex align-items-center justify-content-center mt-3">
-                                    <button
-                                        type="button"
-                                        className="btn btn-danger px-4 me-3"
-                                        onClick={deleteItem}
-                                    >
+                                    <button type="button" className="btn btn-danger px-4 me-3" onClick={deleteBooking}>
                                         Yes
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-danger px-4"
-                                        onClick={closeDeleteModal}
-                                    >
+                                    <button type="button" className="btn btn-outline-danger px-4" onClick={closeDeleteModal}>
                                         No
                                     </button>
                                 </div>

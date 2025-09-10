@@ -4,6 +4,8 @@ import AutoCompleteInput from "../Components/AutoCompleteInput";
 import PersonTable from "../Components/PersonTable";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
+const API_BASE = "http://206.189.130.102:4545/api";
 
 const BookingForm = () => {
     // Customer Info
@@ -28,11 +30,85 @@ const BookingForm = () => {
     // Ref for invoice print
     const invoiceRef = useRef();
 
+
+    // Api Calling
+
+    const [customerlist, setCustomerList] = useState([])
+    const [jewellerylist, setJewelleryList] = useState([])
+    const [dresslist, setDressList] = useState([])
+
+    // 🔹 Fetch all jewellery from API
+    const fetchCustomerList = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/customers`);
+            if (res.data?.success) {
+                setCustomerList(res.data.data || []);
+            } else {
+                toast.error(res.data?.message || "Failed to fetch jewellery list");
+            }
+        } catch (error) {
+            console.error("Error fetching jewellery:", error);
+            toast.error("Something went wrong while fetching jewellery");
+        }
+    };
+
+    const fetchJewelleryList = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/jewelleries/get-jewellery`);
+            if (res.data?.success) {
+                setJewelleryList(res.data.data || []);
+            } else {
+                toast.error(res.data?.message || "Failed to fetch jewellery list");
+            }
+        } catch (error) {
+            console.error("Error fetching jewellery:", error);
+            toast.error("Something went wrong while fetching jewellery");
+        }
+    };
+
+    const fetchDressList = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/lehengas`);
+            if (res.data?.success) {
+                setDressList(res.data.data || []);
+            } else {
+                toast.error(res.data?.message || "Failed to fetch jewellery list");
+            }
+        } catch (error) {
+            console.error("Error fetching jewellery:", error);
+            toast.error("Something went wrong while fetching jewellery");
+        }
+    };
+
+    useEffect(() => {
+        fetchCustomerList();
+        fetchJewelleryList();
+        fetchDressList();
+    }, []);
+
     // Example lists
-    const existingCustomers = ["Rahul Sharma", "Priya Singh", "Ankit Kumar", "Neha Verma", "Amit Patel"];
-    const mobileList = ["9876543210", "9123456789", "9988776655", "9012345678", "8899776655"];
-    const dressList = [{ id: 1, name: "Lehenga" }, { id: 2, name: "Saree" }];
-    const jewelleryList = [{ id: 1, name: "Necklace" }, { id: 2, name: "Earrings" }];
+    // After you fetch from API:
+    const existingCustomers = customerlist.map((c) => c.name);
+    const mobileList = customerlist.map((c) => c.mobile);
+
+    const dressList = dresslist.map((d) => ({
+        id: d._id,
+        name: d.name,
+        code: d.code,
+        size: d.size,
+        isAvailable: d.isAvailable,
+        rentPrice: d.rentPrice,
+
+    }));
+
+    const jewelleryList = jewellerylist.map((j) => ({
+        id: j._id,
+        name: j.name,
+        code: j.code,
+        isAvailable: j.isAvailable,
+        rentPrice: j.rentPrice,
+    }));
+
 
     // Auto-calculate total and due
     useEffect(() => {
@@ -41,16 +117,55 @@ const BookingForm = () => {
         setDue(total - advance);
     }, [itemsData, advance]);
 
-    // Handle form submit
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
+
         if (itemsData.length === 0) {
             toast.error("Please add at least one person with item before booking!");
             return;
         }
-        toast.success("Booking saved successfully!");
-        setShowInvoice(true); // show invoice after save
+
+        try {
+            // Prepare payload
+            const payload = {
+                customerName,
+                mobileNumber,
+                customerAddress,
+                items: itemsData.map((item) => ({
+                    category: item.category,
+                    code: item.code,
+                    name: item.name,
+                    size: item.size,
+                    quantity: item.quantity,
+                    rate: item.rate,
+                    amount: item.amount,
+                    bookingDate: item.bookingDate || new Date().toISOString(),
+                    returnDate: item.returnDate || new Date().toISOString(),
+                })),
+                totalAmount,
+                advance,
+                remark,
+            };
+
+            // Send POST request to API
+            const res = await axios.post(`${API_BASE}/bookings/generate`, payload, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (res.data?.success) {
+                toast.success("Booking saved successfully!");
+                setShowInvoice(true); // show invoice after save
+            } else {
+                toast.error(res.data?.message || "Failed to save booking");
+            }
+        } catch (error) {
+            console.error("Error submitting booking:", error);
+            toast.error("Something went wrong while saving booking");
+        }
     };
+
 
     // Print invoice
     const handlePrintInvoice = () => {
@@ -76,6 +191,28 @@ const BookingForm = () => {
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
     };
+
+    // Auto-fill customer info when mobile number changes
+    useEffect(() => {
+        if (!mobileNumber) {
+            setCustomerName("");
+            setCustomerAddress("");
+            return;
+        }
+
+        const existingCustomer = customerlist.find(c => c.mobile === mobileNumber);
+
+        if (existingCustomer) {
+            // Fill name and address automatically
+            setCustomerName(existingCustomer.name);
+            setCustomerAddress(existingCustomer.adress || "");
+        } else {
+            // Clear name and address so user can enter manually
+            setCustomerName("");
+            setCustomerAddress("");
+        }
+    }, [mobileNumber, customerlist]);
+
 
     return (
         <div className="pb-25">

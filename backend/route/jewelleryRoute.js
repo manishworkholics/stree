@@ -1,22 +1,22 @@
 const express = require('express')
-const { addJewellery, getJewellery, updateJewellery, deleteJewellery } = require('../controller/jewelleryController')
 const upload = require("../middleware/upload");
-const jewelleries = express.Router()
+const router = express.Router()
+const jewelleries = require('../controller/jewelleryController')
 
 
 
 
 
-jewelleries.post('/add-jewellery', upload.single("photo"), addJewellery)
-jewelleries.get('/get-jewellery', getJewellery)
+router.post('/add-jewellery', upload.single("photo"), jewelleries.addJewellery)
+router.get('/get-jewellery', jewelleries.getJewellery)
 
 // Update Lehenga
-jewelleries.put("/update-jewellery/:id", updateJewellery);
+router.put("/update-jewellery/:id", jewelleries.updateJewellery);
 
 // Delete Lehenga
-jewelleries.delete("/delete-jewellery/:id", deleteJewellery);
+router.delete("/delete-jewellery/:id", jewelleries.deleteJewellery);
 
 
 
 
-module.exports = jewelleries
+module.exports = router

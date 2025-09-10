@@ -3,13 +3,14 @@ const asyncHandler = require("express-async-handler");
 
 exports.addJewellery = async (req, res) => {
   try {
-    const { name, code, price, isAvailable } = req.body;
+    const { name, code,rentPrice, isAvailable, category } = req.body;
 
     const jewellery = new Jewellery({
       name,
       code,
-      price,
+      rentPrice,
       isAvailable,
+      category,
       photo: req.file ? `uploads/jewellery/${req.file.filename}` : null,
     });
 
@@ -52,7 +53,7 @@ exports.updateJewellery = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
 
-  const jewelleries= await Jewellery.findByIdAndUpdate(id, updateData, { new: true });
+  const jewelleries = await Jewellery.findByIdAndUpdate(id, updateData, { new: true });
   res.json(jewelleries);
 });
 

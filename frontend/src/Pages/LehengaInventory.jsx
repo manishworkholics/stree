@@ -8,6 +8,7 @@ const API_BASE = "http://206.189.130.102:4545/api/lehengas";
 
 const LehengaInventory = ({ sizeList }) => {
     const [lehengaList, setLehengaList] = useState([]);
+    // const [availability, setAvailability] = useState("true");
     const [newLehenga, setNewLehenga] = useState({
         name: "",
         photo: null,
@@ -73,6 +74,8 @@ const LehengaInventory = ({ sizeList }) => {
         formData.append("size", newLehenga.size);
         formData.append("rentPrice", newLehenga.rentPrice);
         formData.append("code", newLehenga.code);
+        formData.append("category", "68c13eb1bb96998e91450cc7");
+        formData.append("isAvailable", true); // "true" or "false"
         if (newLehenga.photo) {
             formData.append("photo", newLehenga.photo);
         }

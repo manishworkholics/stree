@@ -5,11 +5,13 @@ const cors = require("cors");   // ✅ add this
 const path = require("path");
 const bodyParser = require('body-parser');
 
-const jewelleries = require('./route/jewelleryRoute')
-const bookings = require('./route/bookingRoute');
+const jewelleriesRoutes = require('./route/jewelleryRoute')
+const bookingsRoutes = require('./route/bookingRoute');
 const lehengaRoutes = require("./route/lehengaRoutes");
 const billRoutes = require("./route/billRoutes");
 const reportRoutes = require("./route/reportRoutes");
+const categoryRoutes = require("./route/categoryRoutes");
+const customerRoutes = require("./route/customerRoute");
 
 dbConnect();
 
@@ -28,11 +30,13 @@ app.use(bodyParser.json())
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use('/api/jewelleries', jewelleries)
-app.use('/api/bookings', bookings)
+app.use('/api/jewelleries', jewelleriesRoutes)
+app.use('/api/bookings', bookingsRoutes)
 app.use("/api/lehengas", lehengaRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/customers", customerRoutes);
 
 app.listen(4545, () => {
     console.log("server started")

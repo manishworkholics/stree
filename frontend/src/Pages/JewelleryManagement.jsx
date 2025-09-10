@@ -12,22 +12,8 @@ const JewelleryManagement = () => {
   const [jewelleryList, setJewelleryList] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [editData, setEditData] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // 🔹 Get jewellery list on mount
-  useEffect(() => {
-    fetchJewelleries();
-  }, []);
 
-  const fetchJewelleries = async () => {
-    try {
-      const data = await callApi("/get-jewellery", "GET");
-      setJewelleryList(data);
-    } catch (err) {
-      toast.error(err.message || "Failed to fetch jewelleries");
-    }
-  };
 
   // 🔹 Fetch all jewellery from API
   const fetchJewelleryList = async () => {
@@ -57,7 +43,7 @@ const JewelleryManagement = () => {
   const deleteItem = async (id) => {
     try {
       const res = await axios.delete(`${API_BASE}/delete-jewellery/${id}`);
-      if (res.status===200) {
+      if (res.status === 200) {
         toast.success("Jewellery deleted successfully!");
         fetchJewelleryList(); // refresh list
       } else {
@@ -75,10 +61,6 @@ const JewelleryManagement = () => {
     setIsDeleteModalOpen(false);
   };
 
-  const handleEditClick = (item) => {
-    setEditData(item);       // selected jewellery
-    setIsEditModalOpen(true);
-  };
 
   return (
     <>
@@ -203,16 +185,20 @@ const JewelleryManagement = () => {
                                       <span>{val.name}</span>
                                     </td>
                                     <td>
+                                      {val.code}
+                                    </td>
+                                    <td>
                                       <img
                                         src={val.photo}
                                         alt={val.name}
                                         width="50"
                                       />
                                     </td>
+
                                     <td>
                                       <span>
                                         <i className="fa-solid fa-indian-rupee-sign me-2"></i>
-                                        {val.price}
+                                        {val.rentPrice}
                                       </span>
                                     </td>
                                     <td>
@@ -261,27 +247,6 @@ const JewelleryManagement = () => {
         </div>
       </div>
 
-      {isEditModalOpen && (
-        <div className="modal show" style={{ display: "block", background: "#0000008e" }}>
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header bg-primary py-3">
-                <h4 className="modal-title text-white">Edit Jewellery</h4>
-                <button type="button" className="close" onClick={() => setIsEditModalOpen(false)}>
-                  <i className="fa-solid fa-xmark fs-3 text-white"></i>
-                </button>
-              </div>
-              <div className="modal-body">
-                <EditJewelleryForm
-                  editData={editData}
-                  setJewelleryList={setJewelleryList}
-                  onClose={() => setIsEditModalOpen(false)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Modal */}
       {isDeleteModalOpen && (
