@@ -49,7 +49,7 @@ const Master = () => {
                 <div className="row g-20">
                   <div className="col-xl-3 col-lg-6 col-md-6">
                     <Link
-                      to="/"
+                      to="/dashboard"
                       className="Expovent__count-item mb-20"
                     >
                       <div
@@ -69,7 +69,7 @@ const Master = () => {
                   </div>
                   <div className="col-xl-3 col-lg-6 col-md-6">
                     <Link
-                      to="/supervisor-master"
+                      to="/dashboard"
                       className="Expovent__count-item mb-20"
                     >
                       <div

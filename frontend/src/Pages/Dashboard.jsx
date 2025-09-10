@@ -73,7 +73,7 @@ const Dashboard = () => {
                 {/* Summary Cards */}
                 <div className="row g-20">
                   <div className="col-xl-3 col-lg-6 col-md-6">
-                    <Link to="/bookings">
+                    <Link  to="/dashboard">
                       <div className="Expovent__count-item mb-20">
                         <div
                           className="Expovent__count-thumb include__bg transition-3"
@@ -93,7 +93,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="col-xl-3 col-lg-6 col-md-6">
-                    <Link to="/bookings?filter=pending">
+                    <Link  to="/dashboard">
                       <div className="Expovent__count-item mb-20">
                         <div
                           className="Expovent__count-thumb include__bg transition-3"
@@ -113,7 +113,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="col-xl-3 col-lg-6 col-md-6">
-                    <Link to="/bookings?filter=returned">
+                    <Link  to="/dashboard">
                       <div className="Expovent__count-item mb-20">
                         <div
                           className="Expovent__count-thumb include__bg transition-3"
@@ -133,7 +133,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="col-xl-3 col-lg-6 col-md-6">
-                    <Link to="/payments">
+                    <Link  to="/dashboard">
                       <div className="Expovent__count-item mb-20">
                         <div
                           className="Expovent__count-thumb include__bg transition-3"
@@ -177,13 +177,13 @@ const Dashboard = () => {
                               <div key={event.id} className="news__item">
                                 <div className="news__item-inner">
                                   <div className="news__thumb">
-                                    <Link to="/bookings">
+                                    <Link  to="/dashboard">
                                       <img src="assets/img/blog/meta/01.png" alt="" />
                                     </Link>
                                   </div>
                                   <div className="news__content">
                                     <h4 className="news__title">
-                                      <Link to="/bookings">{event.name}</Link>
+                                      <Link  to="/dashboard">{event.name}</Link>
                                     </h4>
                                     <div className="news__meta">
                                       <div className="news__meta-status">
