@@ -2,6 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
+
+    const handleLogout = () => {
+        // Remove token
+        localStorage.removeItem("token");
+
+        // Redirect to login page
+        window.location.href = "/rental-system/";
+    };
+
     return (
         <>
             <div className="app__header__area shadow">
@@ -24,7 +33,7 @@ const Header = () => {
                     <div className="app__header-right">
                         <div className="nav-item">
                             {/* Logout Button (static) */}
-                            <Link to="/" className="btn btn-outline-danger d-none d-lg-block">Logout</Link>
+                            <button onClick={handleLogout} className="btn btn-outline-danger d-none d-lg-block">Logout</button>
 
                             {/* Mobile Menu Button */}
                             <button
@@ -121,7 +130,7 @@ const Header = () => {
                                                     </Link>
                                                 </li>
                                                 <li>
-                                                    <Link to="/">
+                                                    <Link onClick={handleLogout}>
                                                         <i className="fa-solid fa-arrow-right-from-bracket"></i>
                                                         <span className="nav-text">Logout</span>
                                                     </Link>

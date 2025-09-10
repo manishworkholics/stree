@@ -1,30 +1,73 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Logo from '../Images/logo/logo.png'
-import SignInImg from '../Images/sign/signin.png'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Logo from "../Images/logo/logo.png";
+import SignInImg from "../Images/sign/signin.png";
 
 const SignIn = () => {
+    const navigate = useNavigate();
+
+    // form state
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError("");
+
+        if (!email || !password) {
+            setError("Please fill in all fields");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:4545/api/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.message || "Login failed");
+                return;
+            }
+
+            // Save token in localStorage
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("admin", JSON.stringify(data.admin));
+
+            // Navigate to dashboard
+            navigate("/dashboard");
+        } catch (err) {
+            setError("Something went wrong. Try again.");
+        }
+    };
+
     return (
         <div className="container-fluid p-0">
             <div className="signIn-page">
-                <section className="signin__area" style={{ minHeight: '100vh' }}>
+                <section className="signin__area" style={{ minHeight: "100vh" }}>
                     <div className="sign__main-wrapper my-0">
                         {/* Left Side */}
                         <div className="sign__left">
                             <div className="sign__header text-center justify-content-center">
                                 <div className="sign__logo text-center">
-                                        <img
-                                            className="logo-black"
-                                            src={Logo}
-                                            style={{ width: '150px', height: '90px', objectFit: 'contain' }}
-                                            alt="Logo"
-                                        />
-                                        <img
-                                            className="logo-white"
-                                            src={Logo}
-                                            style={{ width: '150px', height: '90px', objectFit: 'contain' }}
-                                            alt="Logo"
-                                        />
+                                    <img
+                                        className="logo-black"
+                                        src={Logo}
+                                        style={{ width: "150px", height: "90px", objectFit: "contain" }}
+                                        alt="Logo"
+                                    />
+                                    <img
+                                        className="logo-white"
+                                        src={Logo}
+                                        style={{ width: "150px", height: "90px", objectFit: "contain" }}
+                                        alt="Logo"
+                                    />
                                 </div>
                             </div>
 
@@ -35,19 +78,21 @@ const SignIn = () => {
                                 </div>
 
                                 <div className="sign__input-form text-center">
-                                    {/* Static Error Message Example */}
-                                    {/* <div className="alert alert-danger">Please fill in all fields</div> */}
+                                    {error && <div className="alert alert-danger">{error}</div>}
 
-                                    <form>
-
+                                    <form onSubmit={handleLogin}>
                                         {/* Email Input */}
                                         <div className="sign__input">
                                             <input
                                                 type="email"
                                                 placeholder="Email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
                                                 required
                                             />
-                                            <span><i className="fa-solid fa-user"></i></span>
+                                            <span>
+                                                <i className="fa-solid fa-user"></i>
+                                            </span>
                                         </div>
 
                                         {/* Password Input */}
@@ -55,15 +100,13 @@ const SignIn = () => {
                                             <input
                                                 type="password"
                                                 placeholder="Enter your password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
                                                 required
                                             />
-                                            <span><i className="fa-solid fa-lock"></i></span>
-                                            <button
-                                                type="button"
-                                                className="position-absolute end-0 top-0 mt-3 me-3"
-                                            >
-                                                <i className="fa-solid fa-eye text-secondary"></i>
-                                            </button>
+                                            <span>
+                                                <i className="fa-solid fa-lock"></i>
+                                            </span>
                                         </div>
 
                                         {/* Remember Me */}
@@ -72,9 +115,9 @@ const SignIn = () => {
                                                 <input
                                                     className="e-check-input"
                                                     type="checkbox"
-                                                    id="register"
+                                                    id="remember"
                                                 />
-                                                <label className="sign__check-text" htmlFor="register">
+                                                <label className="sign__check-text" htmlFor="remember">
                                                     <span>Remember Me</span>
                                                 </label>
                                             </div>
@@ -82,9 +125,9 @@ const SignIn = () => {
 
                                         {/* Submit Button */}
                                         <div className="sing_button mb-20">
-                                            <Link to="/dashboard" className="input__btn w-100 mb-20">
+                                            <button type="submit" className="input__btn w-100 mb-20">
                                                 Sign in
-                                            </Link>
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -97,8 +140,8 @@ const SignIn = () => {
                                 className="sign__input-thumb"
                                 style={{
                                     backgroundImage: `url(${SignInImg})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center'
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
                                 }}
                             ></div>
                         </div>

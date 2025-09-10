@@ -12,6 +12,7 @@ const billRoutes = require("./route/billRoutes");
 const reportRoutes = require("./route/reportRoutes");
 const categoryRoutes = require("./route/categoryRoutes");
 const customerRoutes = require("./route/customerRoute");
+const adminRoutes = require("./route/adminRoutes");
 
 dbConnect();
 
@@ -37,6 +38,7 @@ app.use("/api/bills", billRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(4545, () => {
     console.log("server started")

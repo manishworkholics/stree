@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
@@ -23,22 +24,107 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter basename="/rental-system">
     <Routes>
       <Route path="/" element={<App />}>
+        {/* Public Routes */}
         <Route path="/" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/monthly-report" element={<MonthlyReport />} />
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/booking-management" element={<BookingManagement />} />
-        <Route path="/jewellery-management" element={<JewelleryManagement />} />
-        <Route path="/lehenga-inventory" element={<LehengaInventory />} />
 
-
-        <Route path="/event-details/:id" element={<EventDetail />} />
-        <Route path="/view-quotation" element={<Viewquotation />} />
-        <Route path="/category-master" element={<CategoryMaster />} />
-        <Route path="/category-item-master" element={<CategoryItemMaster />} />
-        <Route path="/term-and-conditions-master" element={<TermAndConditionsMaster />} />
-        <Route path="/master" element={<Master />} />
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/monthly-report"
+          element={
+            <ProtectedRoute>
+              <MonthlyReport />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/billing"
+          element={
+            <ProtectedRoute>
+              <Billing />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/booking-management"
+          element={
+            <ProtectedRoute>
+              <BookingManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jewellery-management"
+          element={
+            <ProtectedRoute>
+              <JewelleryManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lehenga-inventory"
+          element={
+            <ProtectedRoute>
+              <LehengaInventory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/event-details/:id"
+          element={
+            <ProtectedRoute>
+              <EventDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/view-quotation"
+          element={
+            <ProtectedRoute>
+              <Viewquotation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/category-master"
+          element={
+            <ProtectedRoute>
+              <CategoryMaster />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/category-item-master"
+          element={
+            <ProtectedRoute>
+              <CategoryItemMaster />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/term-and-conditions-master"
+          element={
+            <ProtectedRoute>
+              <TermAndConditionsMaster />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master"
+          element={
+            <ProtectedRoute>
+              <Master />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   </BrowserRouter>
