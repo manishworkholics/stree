@@ -1,54 +1,65 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { callApi } from "../utils/api";
+import axios from "axios";
 
-const JewelleryForm = ({ setJewelleryList }) => {
+const API_BASE = "http://206.189.130.102:4545/api/jewelleries";
+
+const JewelleryForm = ({ fetchJewelleryList }) => {
   const [name, setName] = useState("");
   const [jewelleryCode, setJewelleryCode] = useState("");
   const [price, setPrice] = useState("");
-  const [availability, setAvailability] = useState("Available");
-  const [photo, setPhoto] = useState("");
+  const [availability, setAvailability] = useState("true"); // backend expects boolean string
+  const [photo, setPhoto] = useState(null);
+  const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // const handlePhotoUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setPhoto(file); // store the file for uploading
-  //   }
-  // };
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhoto(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!name || !price) {
+    if (!name || !price || !jewelleryCode) {
       toast.error("Please fill all required fields!");
       return;
     }
 
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("code", jewelleryCode);
+    formData.append("price", price);
+    formData.append("isAvailable", availability); // "true" or "false"
+    if (photo) {
+      formData.append("photo", photo);
+    }
+
     try {
-      // Prepare form data (to handle file upload)
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("code", jewelleryCode);
-      formData.append("pricePerDay", price);
-      formData.append("isAvailable", availability);
-      if (photo) formData.append("photo", photo);
+      setLoading(true);
+      const res = await axios.post(`${API_BASE}/add-jewellery`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      // Call backend API
-      const savedJewellery = await callApi("/add-jewellery", "POST", formData);
-
-      // Update local state
-      setJewelleryList((prev) => [...prev, savedJewellery]);
-      toast.success("Jewellery added successfully!");
-
-      // Reset form
-      setName("");
-      setJewelleryCode("");
-      setPrice("");
-      setAvailability("Available");
-      setPhoto("");
-
+      if (res.data?.success) {
+        toast.success("Jewellery added successfully!");
+        fetchJewelleryList(); // refresh list after adding
+        setName("");
+        setJewelleryCode("");
+        setPrice("");
+        setAvailability("true");
+        setPhoto(null);
+        setPreview("");
+      } else {
+        toast.error(res.data?.message || "Failed to add jewellery");
+      }
     } catch (error) {
-      toast.error(error.message || "Failed to add jewellery!");
+      console.error("Error adding jewellery:", error);
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,16 +99,16 @@ const JewelleryForm = ({ setJewelleryList }) => {
             value={availability}
             onChange={(e) => setAvailability(e.target.value)}
           >
-            <option value="Available">Available</option>
-            <option value="Not Available">Not Available</option>
+            <option value="true">Available</option>
+            <option value="false">Not Available</option>
           </select>
         </div>
         <div className="col-12 col-lg-4 singel__input-field mb-15">
           <label className="input__field-text">Photo</label>
-          <input type="file" accept="image/*" />
-          {photo && (
+          <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+          {preview && (
             <img
-              src={URL.createObjectURL(photo)}
+              src={preview}
               alt="preview"
               width="80"
               className="mt-2 rounded"
@@ -105,7 +116,9 @@ const JewelleryForm = ({ setJewelleryList }) => {
           )}
         </div>
       </div>
-      <button type="submit" className="btn btn-success">Save Jewellery</button>
+      <button type="submit" className="btn btn-success" disabled={loading}>
+        {loading ? "Saving..." : "Save Jewellery"}
+      </button>
     </form>
   );
 };

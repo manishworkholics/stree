@@ -1,4 +1,5 @@
 const Jewellery = require("../models/jewelleryModel");
+const asyncHandler = require("express-async-handler");
 
 exports.addJewellery = async (req, res) => {
   try {
@@ -44,3 +45,20 @@ exports.getJewellery = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+
+// Update Lehenga
+exports.updateJewellery = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  const jewelleries= await Jewellery.findByIdAndUpdate(id, updateData, { new: true });
+  res.json(jewelleries);
+});
+
+// Delete Lehenga
+exports.deleteJewellery = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await Jewellery.findByIdAndDelete(id);
+  res.json({ message: "Jewellery deleted" });
+});
