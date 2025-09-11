@@ -47,7 +47,7 @@ const Master = () => {
                   </div>
                 </div>
                 <div className="row g-20">
-                  <div className="col-xl-3 col-lg-6 col-md-6">
+                  {/* <div className="col-xl-3 col-lg-6 col-md-6">
                     <Link
                       to="/dashboard"
                       className="Expovent__count-item mb-20"
@@ -60,7 +60,7 @@ const Master = () => {
                       ></div>
                       <div className="Expovent__count-content">
                         <h3 className="Expovent__count-number">Lehenga Stock</h3>
-                        {/* <span className="Expovent__count-text">Total Events</span> */}
+                        
                       </div>
                       <div className="Expovent__count-icon">
                         <i className="fa-solid fa-calendar-days"></i>
@@ -80,7 +80,27 @@ const Master = () => {
                       ></div>
                       <div className="Expovent__count-content">
                         <h3 className="Expovent__count-number">Jewellery Stock</h3>
-                        {/* <span className="Expovent__count-text">Total Supervisors</span> */}
+                      
+                      </div>
+                      <div className="Expovent__count-icon">
+                        <i className="fa-solid fa-user-tie"></i>
+                      </div>
+                    </Link>
+                  </div> */}
+                  <div className="col-xl-3 col-lg-6 col-md-6">
+                    <Link
+                      to="/customer"
+                      className="Expovent__count-item mb-20"
+                    >
+                      <div
+                        className="Expovent__count-thumb include__bg transition-3"
+                        style={{
+                          backgroundImage: `url(assets/img/bg/count-bg.png)`,
+                        }}
+                      ></div>
+                      <div className="Expovent__count-content">
+                        <h3 className="Expovent__count-number">Customers List</h3>
+                      
                       </div>
                       <div className="Expovent__count-icon">
                         <i className="fa-solid fa-user-tie"></i>

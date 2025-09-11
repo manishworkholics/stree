@@ -4,11 +4,13 @@ import Header from "../Components/Header";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+
 const API_BASE = "http://206.189.130.102:4545/api/lehengas";
 
 const LehengaInventory = ({ sizeList }) => {
     const [lehengaList, setLehengaList] = useState([]);
-    // const [availability, setAvailability] = useState("true");
+
+
     const [newLehenga, setNewLehenga] = useState({
         name: "",
         photo: null,
@@ -18,13 +20,24 @@ const LehengaInventory = ({ sizeList }) => {
         status: "Available",
     });
 
-
-
     const [preview, setPreview] = useState("");
     const [counters, setCounters] = useState({ out: 0, in: 0 });
+
+    // Delete modal
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    // Edit modal
+    const [editingLehenga, setEditingLehenga] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5;
+
+    // Search
+    const [search, setSearch] = useState("");
 
     // 🔹 Fetch lehenga list from API
     const fetchLehengas = async () => {
@@ -109,12 +122,25 @@ const LehengaInventory = ({ sizeList }) => {
     };
 
     // 🔹 Update status locally (you may need API support for real status update)
-    const handleStatusChange = (id, status) => {
+    const handleStatusChange = async (id, status) => {
         const updatedList = lehengaList.map((item) =>
             item._id === id ? { ...item, status } : item
         );
         setLehengaList(updatedList);
         updateCounters(updatedList);
+
+        // Convert string to boolean if needed
+        const statusBoolean = status === "true";
+
+        try {
+            await axios.put(`http://206.189.130.102:4545/api/lehengas/${id}`, {
+                isAvailable: statusBoolean,
+            });
+            console.log("Status updated successfully");
+            fetchLehengas();// eslint-disable-next-line
+        } catch (err) {
+            console.error("Failed to update status", err);
+        }
     };
 
     // 🔹 Update rented / returned counts
@@ -143,6 +169,56 @@ const LehengaInventory = ({ sizeList }) => {
     };
 
     const closeDeleteModal = () => setIsDeleteModalOpen(false);
+
+
+
+    // 🔹 Update (Edit Lehenga)
+    const handleUpdateLehenga = async () => {
+        try {
+            const formData = new FormData();
+            formData.append("name", editingLehenga.name);
+            formData.append("code", editingLehenga.code);
+            formData.append("rentPrice", editingLehenga.rentPrice);
+
+            // ✅ Only send if it's a new file
+            if (editingLehenga.photo instanceof File) {
+                formData.append("photo", editingLehenga.photo);
+            }
+
+            const res = await axios.put(
+                `${API_BASE}/${editingLehenga._id}`,
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
+
+            if (res.status === 200 || 201) {
+                toast.success("Lehenga updated successfully!");
+                setShowEditModal(false);
+                fetchLehengas();
+            } else {
+                toast.error(res.data?.message || "Failed to update Lehenga");
+            }
+        } catch (error) {
+            console.error("Error updating Lehenga:", error);
+            toast.error("Something went wrong while updating");
+        }
+    };
+
+
+
+    // 🔹 Search filter
+    const filteredData = lehengaList.filter(
+        (j) =>
+            j.name.toLowerCase().includes(search.toLowerCase()) ||
+            j.code.toLowerCase().includes(search.toLowerCase())
+    );
+
+    // 🔹 Pagination
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    const startIdx = (currentPage - 1) * rowsPerPage;
+    const paginatedData = filteredData.slice(startIdx, startIdx + rowsPerPage);
 
     return (
         <>
@@ -176,12 +252,12 @@ const LehengaInventory = ({ sizeList }) => {
                                                 <div className="breadcrumb__tab">
                                                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                                                         <li className="nav-item" role="presentation">
-                                                            <button className="nav-link active" id="tab-1" data-bs-toggle="tab" data-bs-target="#tab-1-pane" type="button">
+                                                            <button className="nav-link " id="tab-1" data-bs-toggle="tab" data-bs-target="#tab-1-pane" type="button">
                                                                 Add Lehenga
                                                             </button>
                                                         </li>
                                                         <li className="nav-item" role="presentation">
-                                                            <button className="nav-link" id="tab-2" data-bs-toggle="tab" data-bs-target="#tab-2-pane" type="button">
+                                                            <button className="nav-link active" id="tab-2" data-bs-toggle="tab" data-bs-target="#tab-2-pane" type="button">
                                                                 Lehenga List
                                                             </button>
                                                         </li>
@@ -196,7 +272,7 @@ const LehengaInventory = ({ sizeList }) => {
                                     <div className="tab-content" id="myTabContent">
 
                                         {/* 🔹 Add Lehenga Tab */}
-                                        <div className="tab-pane fade show active" id="tab-1-pane" role="tabpanel">
+                                        <div className="tab-pane fade" id="tab-1-pane" role="tabpanel">
                                             <div className="body__card-wrapper">
                                                 <form onSubmit={handleAddLehenga}>
                                                     <div className="row mb-4">
@@ -274,12 +350,26 @@ const LehengaInventory = ({ sizeList }) => {
 
                                         {/* 🔹 Lehenga List Tab */}
                                         <div
-                                            className="tab-pane fade"
+                                            className="tab-pane fade show active"
                                             id="tab-2-pane"
                                             role="tabpanel"
                                         >
                                             <div className="body__card-wrapper">
+                                                {/* Search */}
+                                                <div className="mb-3">
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Search by name or code..."
+                                                        value={search}
+                                                        onChange={(e) => {
+                                                            setSearch(e.target.value);
+                                                            setCurrentPage(1);
+                                                        }}
+                                                    />
+                                                </div>
                                                 <div className="attendant__wrapper mb-35">
+
                                                     {loading ? (
                                                         <p>Loading...</p>
                                                     ) : (
@@ -297,7 +387,7 @@ const LehengaInventory = ({ sizeList }) => {
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {lehengaList.length > 0 ? lehengaList.map((val, index) => (
+                                                                {paginatedData.length > 0 ? paginatedData.map((val, index) => (
                                                                     <tr key={val._id}>
                                                                         <td>{index + 1}</td>
                                                                         <td>{val.name}</td>
@@ -306,13 +396,26 @@ const LehengaInventory = ({ sizeList }) => {
                                                                         <td>₹{val.rentPrice}</td>
                                                                         <td>{val.code}</td>
                                                                         <td>
-                                                                            <select value={val.status || "Available"} onChange={e => handleStatusChange(val._id, e.target.value)}>
-                                                                                <option value="Available">Available</option>
-                                                                                <option value="Booked">Booked</option>
-                                                                                <option value="Returned">Returned</option>
+                                                                            <select value={val.isAvailable ? "true" : "false"} onChange={e => handleStatusChange(val._id, e.target.value)}>
+                                                                                <option value="true">Available</option>
+                                                                                <option value="false">Booked</option>
                                                                             </select>
+
                                                                         </td>
+
                                                                         <td>
+
+                                                                            <button
+                                                                                type="button"
+                                                                                className="btn border-0"
+                                                                                onClick={() => {
+                                                                                    setEditingLehenga({ ...val });
+                                                                                    setShowEditModal(true);
+                                                                                }}
+                                                                            >
+                                                                                <i className="fa-solid fa-pen-to-square"></i>
+                                                                            </button>
+
                                                                             <button onClick={() => handleDelete(val._id)} type="button" className="btn border-0">
                                                                                 <i className="fa-solid fa-trash-can text-danger"></i>
                                                                             </button>
@@ -327,6 +430,29 @@ const LehengaInventory = ({ sizeList }) => {
                                                         </table>
                                                     )}
                                                 </div>
+
+                                                {/* Pagination */}
+                                                <div className="d-flex justify-content-center mt-3">
+                                                    <button
+                                                        className="btn btn-secondary me-2"
+                                                        disabled={currentPage === 1}
+                                                        onClick={() => setCurrentPage(currentPage - 1)}
+                                                    >
+                                                        Prev
+                                                    </button>
+                                                    <span className="align-self-center">
+                                                        Page {currentPage} of {totalPages}
+                                                    </span>
+                                                    <button
+                                                        className="btn btn-secondary ms-2"
+                                                        disabled={currentPage === totalPages}
+                                                        onClick={() => setCurrentPage(currentPage + 1)}
+                                                    >
+                                                        Next
+                                                    </button>
+                                                </div>
+
+
                                             </div>
                                         </div>
 
@@ -362,6 +488,114 @@ const LehengaInventory = ({ sizeList }) => {
                     </div>
                 </div>
             )}
+
+
+
+            {/* Edit Modal */}
+
+            {showEditModal && (
+                <div className="modal show d-block" tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Edit Lehenga</h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setShowEditModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <input
+                                    type="text"
+                                    className="form-control mb-2"
+                                    placeholder="Name"
+                                    value={editingLehenga?.name || ""}
+                                    onChange={(e) =>
+                                        setEditingLehenga({ ...editingLehenga, name: e.target.value })
+                                    }
+                                />
+
+                                <input
+                                    type="text"
+                                    className="form-control mb-2"
+                                    placeholder="Code"
+                                    value={editingLehenga?.code || ""}
+                                    onChange={(e) =>
+                                        setEditingLehenga({ ...editingLehenga, code: e.target.value })
+                                    }
+                                />
+
+                                <input
+                                    type="number"
+                                    className="form-control mb-2"
+                                    placeholder="Price"
+                                    value={editingLehenga?.rentPrice || ""}
+                                    onChange={(e) =>
+                                        setEditingLehenga({
+                                            ...editingLehenga,
+                                            rentPrice: e.target.value,
+                                        })
+                                    }
+                                />
+
+                                {/* 🔹 Image Input */}
+                                <label className="form-label">Photo</label>
+                                <input
+                                    type="file"
+                                    className="form-control mb-2"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setEditingLehenga({
+                                                ...editingLehenga,
+                                                photo: file,
+                                                preview: URL.createObjectURL(file), // ✅ temporary preview
+                                            });
+                                        }
+                                    }}
+                                />
+
+                                {/* ✅ If a new file was picked, show preview, otherwise show existing photo */}
+                                {editingLehenga?.preview ? (
+                                    <img
+                                        src={editingLehenga.preview}
+                                        alt="New Preview"
+                                        className="mt-2 rounded"
+                                        width="80"
+                                    />
+                                ) : editingLehenga?.photo && typeof editingLehenga.photo === "string" ? (
+                                    <img
+                                        src={`${editingLehenga.photo}`}
+                                        alt="Existing"
+                                        className="mt-2 rounded"
+                                        width="80"
+                                    />
+                                ) : null}
+
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowEditModal(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleUpdateLehenga}
+                                >
+                                    Save changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </>
     );
 };

@@ -10,7 +10,7 @@ router.post("/add", upload.single("photo"), lehengaController.addLehenga);
 router.get("/", lehengaController.getLehengas);
 
 // Update Lehenga
-router.put("/:id", lehengaController.updateLehenga);
+router.put("/:id",upload.single("photo"), lehengaController.updateLehenga);
 
 // Delete Lehenga
 router.delete("/:id", lehengaController.deleteLehenga);

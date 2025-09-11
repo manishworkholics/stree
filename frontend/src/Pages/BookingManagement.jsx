@@ -11,9 +11,6 @@ const API_BASE = "http://206.189.130.102:4545/api";
 
 const BookingManagement = () => {
     const [bookingList, setBookingList] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-
     const [customerList, setCustomerList] = useState([]);
     const [dressList, setDressList] = useState([]);
     const [sizeList, setSizeList] = useState([]);
@@ -25,8 +22,6 @@ const BookingManagement = () => {
             if (res.data?.success) {
                 const data = res.data.data || [];
                 setBookingList(data);
-                // Optional: calculate total pages if API supports pagination
-                setTotalPages(1);
             } else {
                 toast.error(res.data?.message || "Failed to fetch bookings");
             }
@@ -70,9 +65,11 @@ const BookingManagement = () => {
         fetchSizes();
     }, []);
 
-    const handlePageChange = (page) => {
-        if (page >= 1 && page <= totalPages) setCurrentPage(page);
-    };
+
+
+    const handlereload = () => {
+        fetchBookings();
+    }
 
     return (
         <div className="container-fluid p-0">
@@ -110,7 +107,7 @@ const BookingManagement = () => {
                                                         </button>
                                                     </li>
                                                     <li className="nav-item" role="presentation">
-                                                        <button className="nav-link" id="tab-2" data-bs-toggle="tab" data-bs-target="#tab-2-pane" type="button">
+                                                        <button onClick={handlereload} className="nav-link" id="tab-2" data-bs-toggle="tab" data-bs-target="#tab-2-pane" type="button">
                                                             Booking List
                                                         </button>
                                                     </li>
@@ -153,9 +150,7 @@ const BookingManagement = () => {
                                         <BookingList
                                             bookingList={bookingList}
                                             setBookingList={setBookingList}
-                                            handlePageChange={handlePageChange}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
+
                                         />
                                     </div>
                                 </div>

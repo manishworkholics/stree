@@ -28,11 +28,28 @@ exports.getLehengas = asyncHandler(async (req, res) => {
 
 // Update Lehenga
 exports.updateLehenga = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
+  try {
+    const { id } = req.params;
 
-  const lehenga = await Lehenga.findByIdAndUpdate(id, updateData, { new: true });
-  res.json(lehenga);
+    // Copy body fields safely
+    const updateData = { ...req.body };
+
+    // If new image uploaded
+    if (req.file) {
+      updateData.photo = `uploads/jewellery/${req.file.filename}`;
+    }
+
+    const lehenga = await Lehenga.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!lehenga) {
+      return res.status(404).json({ success: false, message: "Lehenga not found" });
+    }
+
+    res.json({ success: true, data: lehenga });
+  } catch (error) {
+    console.error("Update Lehenga error:", error);
+    res.status(500).json({ success: false, message: "Error updating lehenga" });
+  }
 });
 
 // Delete Lehenga

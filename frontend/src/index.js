@@ -19,6 +19,7 @@ import TermAndConditionsMaster from "./Pages/TermAndConditionsMaster";
 import Viewquotation from "./Pages/Viewquotation.jsx";
 import Master from "./Pages/Master.jsx";
 import LehengaInventory from "./Pages/LehengaInventory.jsx";
+import Customer from "./Pages/Customer.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter basename="/rental-system">
@@ -122,6 +123,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <ProtectedRoute>
               <Master />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/customer"
+          element={
+            <ProtectedRoute>
+              <Customer />
             </ProtectedRoute>
           }
         />

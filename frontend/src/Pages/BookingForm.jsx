@@ -91,23 +91,45 @@ const BookingForm = () => {
     const existingCustomers = customerlist.map((c) => c.name);
     const mobileList = customerlist.map((c) => c.mobile);
 
-    const dressList = dresslist.map((d) => ({
-        id: d._id,
-        name: d.name,
-        code: d.code,
-        size: d.size,
-        isAvailable: d.isAvailable,
-        rentPrice: d.rentPrice,
+    // const dressList = dresslist.map((d) => ({
+    //     id: d._id,
+    //     name: d.name,
+    //     code: d.code,
+    //     size: d.size,
+    //     isAvailable: d.isAvailable,
+    //     rentPrice: d.rentPrice,
 
-    }));
+    // }));
 
-    const jewelleryList = jewellerylist.map((j) => ({
-        id: j._id,
-        name: j.name,
-        code: j.code,
-        isAvailable: j.isAvailable,
-        rentPrice: j.rentPrice,
-    }));
+    // const jewelleryList = jewellerylist.map((j) => ({
+    //     id: j._id,
+    //     name: j.name,
+    //     code: j.code,
+    //     isAvailable: j.isAvailable,
+    //     rentPrice: j.rentPrice,
+    // }));
+
+
+    const dressList = dresslist
+        .filter((d) => d.isAvailable === true)   // ✅ only available dresses
+        .map((d) => ({
+            id: d._id,
+            name: d.name,
+            code: d.code,
+            size: d.size,
+            isAvailable: d.isAvailable,
+            rentPrice: d.rentPrice,
+        }));
+
+    const jewelleryList = jewellerylist
+        .filter((j) => j.isAvailable === true)   // ✅ only available jewellery
+        .map((j) => ({
+            id: j._id,
+            name: j.name,
+            code: j.code,
+            isAvailable: j.isAvailable,
+            rentPrice: j.rentPrice,
+        }));
 
 
     // Auto-calculate total and due
@@ -116,6 +138,56 @@ const BookingForm = () => {
         setTotalAmount(total);
         setDue(total - advance);
     }, [itemsData, advance]);
+
+    // const handleFormSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     if (itemsData.length === 0) {
+    //         toast.error("Please add at least one person with item before booking!");
+    //         return;
+    //     }
+
+    //     try {
+    //         // Prepare payload
+    //         const payload = {
+    //             customerName,
+    //             mobileNumber,
+    //             customerAddress,
+    //             items: itemsData.map((item) => ({
+    //                 category: item.category,
+    //                 code: item.code,
+    //                 name: item.name,
+    //                 size: item.size,
+    //                 quantity: item.quantity,
+    //                 rate: item.rate,
+    //                 amount: item.amount,
+    //                 bookingDate: item.bookingDate || new Date().toISOString(),
+    //                 returnDate: item.returnDate || new Date().toISOString(),
+    //             })),
+    //             totalAmount,
+    //             advance,
+    //             remark,
+    //         };
+
+    //         // Send POST request to API
+    //         const res = await axios.post(`${API_BASE}/bookings/generate`, payload, {
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //         });
+
+    //         if (res.data?.success) {
+    //             toast.success("Booking saved successfully!");
+    //             setShowInvoice(true); // show invoice after save
+    //         } else {
+    //             toast.error(res.data?.message || "Failed to save booking");
+    //         }
+    //     } catch (error) {
+    //         console.error("Error submitting booking:", error);
+    //         toast.error("Something went wrong while saving booking");
+    //     }
+    // };
+
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -126,8 +198,31 @@ const BookingForm = () => {
         }
 
         try {
-            // Prepare payload
+            // 1️⃣ Add Customer first
+            const customerPayload = {
+                name: customerName,
+                mobile: mobileNumber,
+                adress: customerAddress,
+            };
+
+            const customerRes = await axios.post(
+                "http://206.189.130.102:4545/api/customers/add",
+                customerPayload,
+                {
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+
+            if (!customerRes.data?.success) {
+                toast.error(customerRes.data?.message || "Failed to add customer");
+                return;
+            }
+
+            const customerId = customerRes.data?.data?._id; // assuming API returns new customer object
+
+            // 2️⃣ Prepare Booking Payload
             const payload = {
+                customerId, // 🔹 Link booking to this customer
                 customerName,
                 mobileNumber,
                 customerAddress,
@@ -147,16 +242,17 @@ const BookingForm = () => {
                 remark,
             };
 
-            // Send POST request to API
+            // 3️⃣ Save Booking
             const res = await axios.post(`${API_BASE}/bookings/generate`, payload, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
             });
 
             if (res.data?.success) {
-                toast.success("Booking saved successfully!");
+                toast.success("Booking & Customer saved successfully!");
                 setShowInvoice(true); // show invoice after save
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 30000);
             } else {
                 toast.error(res.data?.message || "Failed to save booking");
             }
