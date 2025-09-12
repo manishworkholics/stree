@@ -8,9 +8,11 @@ const bookings = require('../controller/bookingController')
 
 router.post('/generate', bookings.createBooking)
 router.get('/', bookings.getAllBookings)
+router.get('/get-monthly-report', bookings.getMonthlyReport)
 router.get('/:id', bookings.getBookingById)
 router.put('/:id', bookings.updateBooking)
 router.delete('/:id', bookings.deleteBooking)
+
 
 
 

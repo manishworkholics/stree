@@ -1,16 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Sidebar";
 import Header from "../Components/Header";
 import { Link } from "react-router-dom";
 
 const MonthlyReport = () => {
-  const [selectedMonth, setSelectedMonth] = useState("2025-08");
+  const today = new Date();
+  const defaultMonth = today.toISOString().slice(0, 7); // "YYYY-MM"
+  const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
 
-  const dummyBookings = [
-    { id: 1, customer: "John Doe", item: "Red Lehenga", date: "2025-08-12", dress: "D-101", price: 5000 },
-    { id: 2, customer: "Jane Smith", item: "Bride Lehenga", date: "2025-08-15", dress: "D-205", price: 3500 },
-    { id: 3, customer: "Mark Wilson", item: "Pink Lehenga", date: "2025-08-20", dress: "D-309", price: 7000 },
-  ];
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch report
+  const fetchReport = async () => {
+    try {
+      setLoading(true);
+
+      const [year, month] = selectedMonth.split("-");
+      const res = await fetch(`http://localhost:4545/api/bookings/get-monthly-report?month=${month}&year=${year}`);
+
+      const data = await res.json();
+
+      if (data.success) {
+        setBookings(data.report);
+      } else {
+        setBookings([]);
+        console.error("Error:", data.message);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Call on month change
+  useEffect(() => {
+    fetchReport();// eslint-disable-next-line
+  }, [selectedMonth]);
 
   return (
     <div className="container-fluid p-0">
@@ -62,7 +90,6 @@ const MonthlyReport = () => {
                 <label className="input__field-text">Select Month</label>
                 <input
                   type="month"
-                  className=""
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
                 />
@@ -74,35 +101,44 @@ const MonthlyReport = () => {
               <div className="attendan__content">
                 <div className="body__card-wrapper">
                   <div className="attendant__wrapper mb-35">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>S.No</th>
-                          <th>Customer</th>
-                          <th>Item</th>
-                          <th>Date</th>
-                          <th>Dress Code</th>
-                          <th>Price</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dummyBookings.map((b, index) => (
-                          <tr key={b.id}>
-                            <td><span>{index + 1}</span></td>
-                            <td><span>{b.customer}</span></td>
-                            <td><span>{b.item}</span></td>
-                            <td><span>{b.date}</span></td>
-                            <td><span>{b.dress}</span></td>
-                            <td><span>${b.price}</span></td>
+                    {loading ? (
+                      <p>Loading...</p>
+                    ) : bookings.length > 0 ? (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>S.No</th>
+                            <th>Customer</th>
+                            <th>Item</th>
+                            <th>Date</th>
+                            <th>Dress Code</th>
+                            <th>Price</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {bookings.map((b, index) => (
+                            <tr key={index}>
+                              <td><span>{b["S.No"]}</span></td>
+                              <td><span>{b.Customer}</span></td>
+                              <td><span>{b.Item}</span></td>
+                              <td><span>{b.Date}</span></td>
+                              <td><span>{b["Dress Code"]}</span></td>
+                              <td><span>₹{b.Price}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p>No data found for this month.</p>
+                    )}
                   </div>
 
                   {/* Summary */}
                   <div className="px-3 d-flex justify-content-end">
-                    <h5>Total Bookings: {dummyBookings.length} | Total Revenue: ${dummyBookings.reduce((acc, b) => acc + b.price, 0)}</h5>
+                    <h5>
+                      Total Bookings: {bookings.length} | Total Revenue: ₹
+                      {bookings.reduce((acc, b) => acc + (b.Price || 0), 0)}
+                    </h5>
                   </div>
                 </div>
               </div>

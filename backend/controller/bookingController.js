@@ -1,5 +1,5 @@
 const Booking = require("../models/BookingModel");
-
+const moment = require("moment");
 
 // Create booking
 // exports.createBooking = async (req, res) => {
@@ -105,5 +105,52 @@ exports.deleteBooking = async (req, res) => {
         res.status(200).json({ success: true, message: "Booking deleted" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.getMonthlyReport = async (req, res) => {
+    try {
+        const { month, year } = req.query;
+
+        // default to current month/year
+        const selectedMonth = month ? parseInt(month) : moment().month() + 1; // 1-12
+        const selectedYear = year ? parseInt(year) : moment().year();
+
+        // Pad month and build ISO string
+        const monthStr = String(selectedMonth).padStart(2, "0");
+
+        const startDate = moment(`${selectedYear}-${monthStr}-01`, "YYYY-MM-DD").startOf("month").toDate();
+        const endDate = moment(startDate).endOf("month").toDate();
+
+        // Fetch bookings for the month
+        const bookings = await Booking.find({
+            createdAt: { $gte: startDate, $lte: endDate }
+        });
+
+        // Prepare report
+        let report = [];
+        let counter = 1;
+
+        bookings.forEach((booking) => {
+            booking.items.forEach((item) => {
+                report.push({
+                    "S.No": counter++,
+                    "Customer": booking.customerName,
+                    "Item": item.name || "N/A",
+                    "Date": moment(booking.createdAt).format("DD-MM-YYYY"),
+                    "Dress Code": item.code || "N/A",
+                    "Price": item.amount || 0
+                });
+            });
+        });
+
+        res.status(200).json({
+            success: true,
+            month: selectedMonth,
+            year: selectedYear,
+            report
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
     }
 };
