@@ -21,7 +21,7 @@ const SignIn = () => {
         }
 
         try {
-            const res = await fetch("http://localhost:4545/api/admin/login", {
+            const res = await fetch("http://206.189.130.102:4545/api/admin/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
