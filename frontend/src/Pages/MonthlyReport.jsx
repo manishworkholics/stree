@@ -17,7 +17,7 @@ const MonthlyReport = () => {
       setLoading(true);
 
       const [year, month] = selectedMonth.split("-");
-      const res = await fetch(`http://localhost:4545/api/bookings/get-monthly-report?month=${month}&year=${year}`);
+      const res = await fetch(`http://206.189.130.102:4545/api/bookings/get-monthly-report?month=${month}&year=${year}`);
 
       const data = await res.json();
 
